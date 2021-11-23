@@ -235,6 +235,9 @@ def feature_engineering(X, y, model, folds, deg_poly, score, n_jobs, top, path):
                 name_interaction = sort_feature_names(feature_A + ":" + feature_B, orig_features)
                 
                 if name_interaction not in tested_interactions: # features.index(feature_A) >= features.index(feature_B): # >= to create x^2 etc. (but x^3 is only created if x^2 has been chosen) # make sure this interaction has not been done
+                    
+                    print(name_interaction)
+                    
                     tested_interactions.append(name_interaction) # save that this interaction has been calculated
 
                     X['interaction'] = X[feature_A] * X[feature_B]
