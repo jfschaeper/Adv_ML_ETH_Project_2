@@ -31,8 +31,8 @@ features_test.to_csv('../out/features_test.csv', index=False)
 
 # fill nan/drop nan
 features_train = pd.read_csv('../out/features_train.csv')
-features_train = features_train.fillna(0)
-# features_train = features_train.dropna(0)
+# features_train = features_train.fillna(0)
+features_train = features_train.fillna(features_train.median())
 # y_train = y_train.iloc[features_train.index]
 
 
