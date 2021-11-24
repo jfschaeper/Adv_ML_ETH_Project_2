@@ -9,11 +9,8 @@ import neurokit2 as nk
 from statsmodels.tsa.ar_model import AutoReg
 from scipy.stats import kurtosis
 from scipy.stats import skew
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
-from math import comb
 
-# df = pd.read_csv('../data/X_train.csv', index_col='id')
+df = pd.read_csv(r'C:\Users\Felix\Dropbox\Courses\Year 2\Advanced Machine Learning\task2/X_train.csv', index_col='id')
 
 
 def filter_signal(data):
@@ -46,11 +43,16 @@ def extract_pqst_peaks(data, r_peaks):
     keys = ['ECG_P_Peaks', 'ECG_Q_Peaks', 'ECG_S_Peaks', 'ECG_T_Peaks']
     peaks = np.empty([len(keys), N, large]).astype(int)
     for i in range(N):
+        print(i)
         r_i = r_peaks[i][r_peaks[i]>0]
         if len(r_i) < 5: # if insufficient number of r-peaks could be detected, cannot find t, s peaks
             #print(i)
-            continue          
-        _, delineated = nk.ecg_delineate(data.loc[i].dropna().to_numpy(dtype='float32'), r_i, 300)
+            continue
+        try:
+        # the package has some bugs so try two methods
+            _, delineated = nk.ecg_delineate(data.loc[i].dropna().to_numpy(dtype='float32'), r_i, method = "dwt", sampling_rate = 300)
+        except IndexError:
+            _, delineated = nk.ecg_delineate(data.loc[i].dropna().to_numpy(dtype='float32'), r_i, method = "cwt", sampling_rate = 300)
         # delineated is a dictionary containing the indices
         for k, letter in enumerate(keys):
             # replace nans with zeros, those will later be dropped
@@ -179,6 +181,41 @@ def ar_fit(data, p):
         coefs.append(bla)
     return pd.DataFrame(coefs)
 
+
+def frequency_features(data):
+    # compute spectral density based on unfiltered data: 
+    # Do not like to use the filter here since the smoothing hides the pronounced peak < 20
+    # but no filter prob not ideal since the signal is not stationary
+    
+    N = np.shape(data)[0]
+    moments =[]
+    for i in range(N):
+        spectrum_i = {}
+        fs = 300
+        _, Pxx = welch(data.loc[i].dropna().to_numpy(dtype='float32'), fs=fs, nperseg=256 , scaling="spectrum")
+    
+    #compute integral, and take moments from integral (indices are rough approximation)
+        sum_p = np.cumsum(Pxx)
+        spectrum_i["Sum spectrum < 5Hz"] = sum_p[4]
+        spectrum_i["Sum spectrum 5<x<10"] = sum_p[8]-sum_p[4]
+        spectrum_i["Sum spectrum 10<x<13"] = sum_p[12]-sum_p[8]
+        spectrum_i["Sum spectrum 13<x<20"] = sum_p[17]-sum_p[12]
+        spectrum_i["Sum spectrum 20<x<40"] = sum_p[35]-sum_p[17]
+        
+    # take individual spectrum values (since peak of spectral density is concentrated below 20 hz, consistent with literature)
+        for j in [3, 6, 9, 12, 20, 30, 40, 50]:
+            name = "Spectrum " + str(j) + " Hz"
+            spectrum_i[name] = Pxx[j]
+            
+    # get some other moments of the spectrum, potentially irrelevant
+        spectrum_i = get_moments(Pxx, "Spectrum ", spectrum_i)
+        
+    #append to list
+        moments.append(spectrum_i)
+        
+    #return df
+    return pd.DataFrame(moments)    
+
 def feature_process(data, p):
     # input the raw data and the order of the AR one wants to fit
     # returns the feature matrix
@@ -187,16 +224,11 @@ def feature_process(data, p):
     other_peaks = extract_pqst_peaks(filtered_data, r_peaks)
     qrs_features = extract_qrs_features(filtered_data, r_peaks, other_peaks)
     ar_features = ar_fit(data, p) # fit ar process on the unfiltered signal, to preserve that information.
+    frequencies = frequency_features(data)
+    ar_features = ar_features.join(frequencies)
     return ar_features.join(qrs_features)
 
-# X = feature_process(df, 10)
-
-
-
-
-
-
-
+X = feature_process(df, 10)
 
 def sort_feature_names(s, orig_features):
     # sorts s based on the order in orig_features which makes sure that features that combine the same columns have the same name and can be dropped base on the name
@@ -289,4 +321,5 @@ def engineered_testdata(X_test, features, path):
     X_test_eng.to_csv(path, index=False)
 
     return X_test_eng
+
 
