@@ -10,7 +10,7 @@ from statsmodels.tsa.ar_model import AutoReg
 from scipy.stats import kurtosis
 from scipy.stats import skew
 
-df = pd.read_csv(r'C:\Users\Felix\Dropbox\Courses\Year 2\Advanced Machine Learning\task2/X_train.csv', index_col='id')
+# df = pd.read_csv(r'C:\Users\Felix\Dropbox\Courses\Year 2\Advanced Machine Learning\task2/X_train.csv', index_col='id')
 
 
 def filter_signal(data):
@@ -228,7 +228,7 @@ def feature_process(data, p):
     ar_features = ar_features.join(frequencies)
     return ar_features.join(qrs_features)
 
-X = feature_process(df, 10)
+# X = feature_process(df, 10)
 
 def sort_feature_names(s, orig_features):
     # sorts s based on the order in orig_features which makes sure that features that combine the same columns have the same name and can be dropped base on the name

@@ -18,14 +18,10 @@ X = pd.concat([X_train, X_test]).reset_index()
 
 # create features
 p = 5 # lag of AR process
-features_train = feature_process(X_train, p)
-features_train.to_csv('../out/features_train.csv', index=False)
-# features_train = features.iloc[0:len(X_train)]
+features = feature_process(X, p)
+features_train = features.iloc[0:len(X_train)]
 features_train.to_csv('../out/features_train.csv', index=False)
 features_test = features.iloc[len(X_train):len(X)]
-features_test.to_csv('../out/features_test.csv', index=False)
-
-features_test = feature_process(X_test, p)
 features_test.to_csv('../out/features_test.csv', index=False)
 
 
@@ -45,13 +41,13 @@ print("A baseline multinomial logistic regression model achieves an F1 score of:
 
 
 # engineer based on multinomial logit
-print("feature engineering")
-model_engineering = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=10000)
-path = '../out/features_train_engineered.csv'
-features_train_engineered = feature_engineering(features_train, np.ravel(y_train), model_engineering, 5, 3, 'f1_macro', -1, 10, path)
+# print("feature engineering")
+# model_engineering = LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=10000)
+# path = '../out/features_train_engineered.csv'
+# features_train_engineered = feature_engineering(features_train, np.ravel(y_train), model_engineering, 5, 3, 'f1_macro', -1, 10, path)
 
 
-# apply engineering to test data
-features_train_engineered = pd.read_csv('../out/features_train_engineered.csv')
-path = '../out/features_test_engineered.csv'
-features_test_engineered = engineered_testdata(features_train_engineered, features_train_engineered.columns, path)
+# # apply engineering to test data
+# features_train_engineered = pd.read_csv('../out/features_train_engineered.csv')
+# path = '../out/features_test_engineered.csv'
+# features_test_engineered = engineered_testdata(features_train_engineered, features_train_engineered.columns, path)
