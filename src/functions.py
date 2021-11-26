@@ -9,6 +9,8 @@ import neurokit2 as nk
 from statsmodels.tsa.ar_model import AutoReg
 from scipy.stats import kurtosis
 from scipy.stats import skew
+from scipy.signal import welch
+
 
 # df = pd.read_csv(r'C:\Users\Felix\Dropbox\Courses\Year 2\Advanced Machine Learning\task2/X_train.csv', index_col='id')
 
