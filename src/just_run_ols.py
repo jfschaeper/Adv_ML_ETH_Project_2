@@ -5,8 +5,13 @@ from functions import *
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score, KFold
+
+from sklearn.svm import SVC 
+from sklearn.metrics import f1_score, make_scorer
+from sklearn.preprocessing import StandardScaler
+from xgboost import XGBClassifier
+from sklearn.ensemble import StackingClassifier, GradientBoostingClassifier
 
 
 # load data 
@@ -49,3 +54,17 @@ print("A baseline multinomial logistic regression model achieves an F1 score of:
 # features_train_engineered = pd.read_csv('../out/features_train_engineered.csv')
 # path = '../out/features_test_engineered.csv'
 # features_test_engineered = engineered_testdata(features_train_engineered, features_train_engineered.columns, path)
+
+#the models that were tuned individually
+models = list()
+models.append(('xgb', XGBClassifier(objective='multi:softmax', num_class = 4, use_label_encoder=False, n_estimators = 1000, eta = 0.01, gamma = 0.5, min_child_weight = 5, subsample = 0.75, max_depth = 5)))
+models.append(('svm', SVC(C=12, gamma = 0.01, kernel = "rbf")))
+#the meta model to combine the individual predictions
+meta_model = GradientBoostingClassifier()
+
+#the way this works is is fit the "models" on the full x
+#then best parameters for the meta model are found using cross validation
+cv = RepeatedKFold(n_splits=3, n_repeats=1, random_state=42) 
+stack_model = StackingClassifier(estimators=models, final_estimator=meta_model, cv = cv)
+stack_model.fit(X_train, y_train) #import to enter X as z-scores here since svm is sensitive to that
+
