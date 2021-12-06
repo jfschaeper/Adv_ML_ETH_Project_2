@@ -1,11 +1,11 @@
 import os
 os.chdir('src/')
-
-from functions import *
 import numpy as np
 import pandas as pd
+from functions import *
+
 from sklearn.linear_model import LogisticRegression
-from sklearn.model_selection import cross_val_score, KFold
+from sklearn.model_selection import cross_val_score, KFold, RepeatedKFold
 
 from sklearn.svm import SVC 
 from sklearn.metrics import f1_score, make_scorer
@@ -40,7 +40,7 @@ from xgboost import XGBClassifier
 model_baseline = XGBClassifier(n_estimators=1000, eta = 0.1, objective='multi:softmax' , use_label_encoder=False, eval_metric='mlogloss') # LogisticRegression(multi_class='multinomial', solver='lbfgs', max_iter=10000)
 crossvalidation = KFold(n_splits=10, shuffle=True, random_state=42)
 baseline = np.mean(cross_val_score(model_baseline, features_train, np.ravel(y_train), scoring="f1_micro", cv=crossvalidation, n_jobs=-1))
-print("A baseline multinomial logistic regression model achieves an F1 score of: ", baseline)
+print("A baseline XGBoost model achieves an F1 score of: ", baseline)
 
 
 # engineer based on multinomial logit
