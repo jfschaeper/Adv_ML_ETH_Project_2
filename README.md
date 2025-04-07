@@ -1,8 +1,8 @@
-# 🫀 ECG Signal Classification
+# ECG Signal Classification
 
 This project classifies ECG (electrocardiogram) signals into different heartbeat types using deep learning, classical statistical models, and signal processing techniques.
 
-## 📦 Project Structure
+## Project Structure
 
 - `combine_normal_beats_CNN.ipynb` – Final working notebook. Uses CNNs on extracted heartbeats (QRST complexes).
 - `LSTM.ipynb` – Alternative approach using raw time series and LSTM models (less effective).
@@ -11,15 +11,15 @@ This project classifies ECG (electrocardiogram) signals into different heartbeat
 
 ---
 
-## 🚀 Approach
+## Approach
 
-### 🧹 1. Signal Preprocessing
+### 1. Signal Preprocessing
 
 - ECG signals are filtered using [`biosppy`](https://github.com/PIA-Group/BioSPPy) and `heartpy`.
 - R-peaks are detected using several ECG segmenters (`engzee`, `ssf`, `hamilton`, etc.).
 - From these R-peaks, heartbeats (QRST segments) are extracted.
 
-### 🔬 2. Feature Extraction
+### 2. Feature Extraction
 
 We engineer features in three domains:
 
@@ -34,19 +34,19 @@ We engineer features in three domains:
 #### c. AR Model Features
 - Coefficients and residual variance from an AR(15) time series model
 
-### 🧠 3. Modeling
+### 3. Modeling
 
-#### ✅ CNN (Final model)
+#### CNN (Final model)
 - Trains a convolutional neural network on extracted heartbeats
 - Predictions are made at the beat level, then aggregated to the patient level using majority vote
 
-#### 🧪 Tried but not used:
+#### Tried but not used:
 - LSTM model on padded raw ECG sequences
 - Classical models using OLS regression with hand-crafted features
 
 ---
 
-## 🏁 Results
+## Results
 
 - The CNN model trained on individual heartbeats performed best, offering accurate classification and robustness to noisy signals.
 - Aggregating beat-level predictions improves overall performance.
